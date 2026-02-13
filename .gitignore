@@ -39,6 +39,7 @@ data/
 # ----------------------
 *.log
 *.txt
+!requirements.txt
 container_*.txt
 .pytest_cache/
 .mypy_cache/

@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+tqdm
+mlflow
+transformers
+torch
+numpy
+seqeval
+prometheus_client
+onnx
+onnxruntime
+httpx
+pytest
+python-multipart
