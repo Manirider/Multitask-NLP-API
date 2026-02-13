@@ -34,8 +34,7 @@ def process_sentiment():
     for i, item in tqdm(enumerate(dataset), total=min(len(dataset), MAX_SAMPLES)):
         if i >= MAX_SAMPLES:
             break
-        processed_data.append(
-            {"text": item["sentence"], "label": item["label"]})
+        processed_data.append({"text": item["sentence"], "label": item["label"]})
 
     save_json(processed_data, "sentiment_train.json")
 
@@ -55,16 +54,14 @@ def process_ner():
         for i, item in tqdm(enumerate(dataset), total=min(len(dataset), MAX_SAMPLES)):
             if i >= MAX_SAMPLES:
                 break
-            processed_data.append(
-                {"tokens": item["tokens"], "tags": item["ner_tags"]})
+            processed_data.append({"tokens": item["tokens"], "tags": item["ner_tags"]})
 
         save_json(processed_data, "ner_train.json")
 
         val_dataset = load_dataset("conll2003", split="validation")
         val_data = []
         for item in val_dataset:
-            val_data.append(
-                {"tokens": item["tokens"], "tags": item["ner_tags"]})
+            val_data.append({"tokens": item["tokens"], "tags": item["ner_tags"]})
         save_json(val_data, "ner_validation.json")
 
     except Exception as e:

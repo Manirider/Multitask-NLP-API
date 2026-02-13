@@ -43,8 +43,7 @@ def _get_model():
 
 def _get_tokenizer():
     if tokenizer is None:
-        raise HTTPException(
-            status_code=503, detail="Tokenizer not initialized")
+        raise HTTPException(status_code=503, detail="Tokenizer not initialized")
     return tokenizer
 
 
@@ -62,14 +61,11 @@ async def predict_sentiment(request: SentimentRequest):
     session = _get_model()
     tok = _get_tokenizer()
 
-    inputs = tok(request.text, return_tensors="np",
-                 truncation=True, padding=True)
-    outputs = _run_inference(
-        session, inputs["input_ids"], inputs["attention_mask"])
+    inputs = tok(request.text, return_tensors="np", truncation=True, padding=True)
+    outputs = _run_inference(session, inputs["input_ids"], inputs["attention_mask"])
 
     logits = outputs[0]
-    probabilities = np.exp(logits) / \
-        np.sum(np.exp(logits), axis=-1, keepdims=True)
+    probabilities = np.exp(logits) / np.sum(np.exp(logits), axis=-1, keepdims=True)
     predicted_class_id = int(np.argmax(probabilities, axis=-1)[0])
     score = float(probabilities[0][predicted_class_id])
     sentiment = "positive" if predicted_class_id == 1 else "negative"
@@ -91,8 +87,7 @@ async def predict_ner(request: NERRequest):
     )
 
     offset_mapping = inputs.pop("offset_mapping")[0]
-    outputs = _run_inference(
-        session, inputs["input_ids"], inputs["attention_mask"])
+    outputs = _run_inference(session, inputs["input_ids"], inputs["attention_mask"])
 
     ner_logits = outputs[1]
     predictions = np.argmax(ner_logits, axis=-1)[0]
@@ -125,7 +120,7 @@ async def predict_ner(request: NERRequest):
         elif label.startswith("I-") and current_entity:
             if label[2:] == current_entity["type"]:
                 current_entity["text"] = request.text[
-                    current_entity["start_char"]: char_end
+                    current_entity["start_char"] : char_end
                 ]
                 current_entity["end_char"] = char_end
             else:
@@ -168,8 +163,7 @@ async def predict_qa(request: QARequest):
     )
 
     offset_mapping = inputs.pop("offset_mapping")[0]
-    outputs = _run_inference(
-        session, inputs["input_ids"], inputs["attention_mask"])
+    outputs = _run_inference(session, inputs["input_ids"], inputs["attention_mask"])
 
     start_logits = outputs[2]
     end_logits = outputs[3]
@@ -180,7 +174,7 @@ async def predict_qa(request: QARequest):
     if end_index < start_index:
         end_index = start_index
 
-    answer_tokens = inputs["input_ids"][0][start_index: end_index + 1]
+    answer_tokens = inputs["input_ids"][0][start_index : end_index + 1]
     answer = tok.decode(answer_tokens, skip_special_tokens=True)
     score = float(np.max(start_logits) + np.max(end_logits))
 

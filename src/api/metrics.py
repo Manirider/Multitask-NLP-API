@@ -10,8 +10,7 @@ API_REQUESTS_TOTAL = Counter(
 )
 
 API_REQUEST_LATENCY = Histogram(
-    "api_request_latency_seconds", "API request latency in seconds", [
-        "endpoint"]
+    "api_request_latency_seconds", "API request latency in seconds", ["endpoint"]
 )
 
 
@@ -28,8 +27,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         method = request.method
         status = str(response.status_code)
 
-        API_REQUESTS_TOTAL.labels(
-            endpoint=endpoint, method=method, status=status).inc()
+        API_REQUESTS_TOTAL.labels(endpoint=endpoint, method=method, status=status).inc()
         API_REQUEST_LATENCY.labels(endpoint=endpoint).observe(latency)
 
         return response
