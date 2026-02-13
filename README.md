@@ -1,17 +1,8 @@
 # Production-Ready Multi-Task NLP API
 
-![Python](https://img.shields.io/badge/Python-3.10-blue.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.1-ee4c2c.svg)
-![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2.svg)
-![ONNX](https://img.shields.io/badge/ONNX-Runtime-blueviolet.svg)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)
-
 **A production-grade NLP system serving Sentiment Analysis, Named Entity Recognition (NER), and Question Answering (QA) via a single shared Transformer model.**
 
----
-
-## 🚀 Project Overview
+##  Project Overview
 
 This project implements a scalable, multi-task NLP architecture designed for high-performance inference. Instead of deploying three separate models (which would triple memory usage and maintenance), we utilize a **shared DistilBERT encoder** with lightweight task-specific heads. 
 
@@ -25,9 +16,7 @@ The system is fully containerized, tracks experiments via **MLflow**, and export
 - **Observability**: Prometheus metrics for API latency and throughput monitoring.
 - **Infrastructure-as-Code**: One-command deployment via Docker Compose with health checks.
 
----
-
-## 🏗️ System Architecture
+##  System Architecture
 
 The system uses a hard-parameter sharing approach where the lower layers (DistilBERT) are shared across all tasks, while the top layers (Heads) specialized for each specific task.
 
@@ -48,9 +37,7 @@ The system uses a hard-parameter sharing approach where the lower layers (Distil
              "positive"}      "ORG"}]         "Paris"}
 ```
 
----
-
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Component | Technology | Reasoning |
 |-----------|------------|-----------|
@@ -62,9 +49,7 @@ The system uses a hard-parameter sharing approach where the lower layers (Distil
 | **Ops** | Docker, Docker Compose | Reproducible environments; "works on my machine" guarantee. |
 | **Monitoring** | Prometheus | Real-time metrics scraping for latency/throughput. |
 
----
-
-## 📂 Project Structure
+##  Project Structure
 
 ```bash
 MULTITASK-NLP-API/
@@ -81,9 +66,7 @@ MULTITASK-NLP-API/
 └── requirements.txt         # Production dependencies
 ```
 
----
-
-## ⚡ Setup & Usage
+##  Setup & Usage
 
 ### 1. Clone the Repository
 ```bash
@@ -104,8 +87,6 @@ Launch the entire stack (Training + API + MLflow + Monitoring):
 docker-compose up --build
 ```
 *The system will automatically download datasets, train the model (approx. 40-60 mins on CPU), export to ONNX, and start the API.*
-
----
 
 ## 🔌 API Endpoints
 
@@ -165,10 +146,7 @@ curl -X POST http://localhost:8000/predict/qa \
   "score": 0.95
 }
 ```
-
----
-
-## 📊 MLflow & Monitoring
+##  MLflow & Monitoring
 
 ### Experiment Tracking (MLflow)
 Access the MLflow UI at [http://localhost:5000](http://localhost:5000).
@@ -180,9 +158,7 @@ Metrics are exposed at `http://localhost:8000/metrics`.
 - `api_requests_total`: Total request count.
 - `api_request_latency_seconds`: Histogram of response times.
 
----
-
-## 💡 Design Decisions
+##  Design Decisions
 
 1.  **Shared Encoder (Hard Parameter Sharing)**:
     *   **Decision**: We used a single DistilBERT base for all three tasks.
@@ -196,15 +172,15 @@ Metrics are exposed at `http://localhost:8000/metrics`.
     *   **Decision**: Training batches cycle through tasks (Batch 1: Sentiment, Batch 2: NER, Batch 3: QA).
     *   **Reasoning**: This prevents "catastrophic forgetting" where the model optimizes for one task at the expense of others. It ensures balanced gradient updates across the shared encoder.
 
----
-
-## 🔮 Future Improvements
+##  Future Improvements
 
 - **GPU Support**: Add `nvidia-docker` support for CUDA acceleration in training and inference.
 - **Redis Caching**: Implement a cache layer for frequent queries (e.g., common QA pairs).
 - **Asynchronous Batching**: Use `batches` in FastAPI to group incoming requests for higher throughput.
 
----
-
-## 📄 License
+##  License
 This project is licensed under the MIT License.
+
+## AUTHOR
+**MANIKANTA SURYASAI**
+AIML & BLOCKCHAIN DEVELOPER
