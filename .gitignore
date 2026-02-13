@@ -1,0 +1,54 @@
+# ----------------------
+# Python / Environment
+# ----------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+.venv
+build/
+dist/
+*.egg
+*.onnx
+*.pt
+*.bin
+*.pkl-info/
+
+# ----------------------
+# MLflow & Artifacts
+# ----------------------
+mlruns/
+.mlflow/
+onnx_export/
+model_output/
+
+# ----------------------
+# Data
+# ----------------------
+data/
+!data/.gitkeep
+*.json
+*.jsonl
+
+# ----------------------
+# Logs & Debugging
+# ----------------------
+*.log
+*.txt
+container_*.txt
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ----------------------
+# IDE & OS
+# ----------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

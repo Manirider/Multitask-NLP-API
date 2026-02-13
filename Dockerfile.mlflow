@@ -1,0 +1,13 @@
+FROM python:3.10-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+RUN pip install --timeout 300 --retries 5 mlflow==2.5.0 psycopg2-binary boto3
+
+ENV MLFLOW_SERVER_HOST 0.0.0.0
+ENV MLFLOW_SERVER_PORT 5000
+ENV MLFLOW_SERVER_DEFAULT_ARTIFACT_ROOT /mlruns
+ENV MLFLOW_BACKEND_STORE_URI sqlite:///mlruns/mlflow.db
+
+EXPOSE 5000
+
+CMD ["mlflow", "server", "--backend-store-uri", "sqlite:///mlruns/mlflow.db", "--default-artifact-root", "/mlruns", "--host", "0.0.0.0", "--port", "5000"]
