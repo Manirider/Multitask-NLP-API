@@ -13,3 +13,4 @@ onnxruntime
 httpx
 pytest
 python-multipart
+pydantic-settings
