@@ -1,6 +1,8 @@
-import structlog
 import logging
 import sys
+
+import structlog
+
 
 def configure_logger():
 
@@ -13,12 +15,13 @@ def configure_logger():
             structlog.processors.StackInfoRenderer(),
             structlog.dev.set_exc_info,
             structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.JSONRenderer()
+            structlog.processors.JSONRenderer(),
         ],
         logger_factory=structlog.stdlib.LoggerFactory(),
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
+
 
 def get_logger(name):
     return structlog.get_logger(name)

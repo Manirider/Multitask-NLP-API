@@ -1,22 +1,23 @@
+import os
 from contextlib import asynccontextmanager
 
+import mlflow
 from fastapi import FastAPI
 from prometheus_client import make_asgi_app
 from transformers import DistilBertTokenizerFast
-import mlflow
-import os
 
-from src.api.routes import router as api_router
+import src.api.routes as routes_module
 from src.api.metrics import MetricsMiddleware
-from src.utils.mlflow_utils import setup_mlflow, get_latest_run_id
-from src.utils.onnx_utils import create_onnx_session
+from src.api.routes import router as api_router
 from src.config import get_settings
 from src.utils.logging_utils import configure_logger, get_logger
-import src.api.routes as routes_module
+from src.utils.mlflow_utils import get_latest_run_id, setup_mlflow
+from src.utils.onnx_utils import create_onnx_session
 
 configure_logger()
 logger = get_logger(__name__)
 settings = get_settings()
+
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -63,13 +64,14 @@ async def lifespan(application: FastAPI):
 
     logger.info("Shutting down API service.")
 
-app = FastAPI(title=settings.APP_NAME,
-              version=settings.APP_VERSION, lifespan=lifespan)
+
+app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION, lifespan=lifespan)
 
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 app.add_middleware(MetricsMiddleware)
 app.include_router(api_router)
+
 
 @app.get("/")
 def root():

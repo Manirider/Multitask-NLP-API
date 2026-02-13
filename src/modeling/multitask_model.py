@@ -1,6 +1,6 @@
-import torch
 import torch.nn as nn
-from transformers import DistilBertModel, DistilBertConfig
+from transformers import DistilBertModel
+
 
 class MultiTaskDistilBert(nn.Module):
     def __init__(self, model_name="distilbert-base-uncased", num_ner_labels=9):
@@ -12,12 +12,11 @@ class MultiTaskDistilBert(nn.Module):
             nn.Linear(self.config.hidden_size, self.config.hidden_size),
             nn.ReLU(),
             nn.Dropout(0.1),
-            nn.Linear(self.config.hidden_size, 2)
+            nn.Linear(self.config.hidden_size, 2),
         )
 
         self.ner_head = nn.Sequential(
-            nn.Dropout(0.1),
-            nn.Linear(self.config.hidden_size, num_ner_labels)
+            nn.Dropout(0.1), nn.Linear(self.config.hidden_size, num_ner_labels)
         )
 
         self.qa_head = nn.Linear(self.config.hidden_size, 2)
@@ -29,7 +28,7 @@ class MultiTaskDistilBert(nn.Module):
         task_name,
         labels=None,
         start_positions=None,
-        end_positions=None
+        end_positions=None,
     ):
         outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
         sequence_output = outputs.last_hidden_state
@@ -67,7 +66,4 @@ class MultiTaskDistilBert(nn.Module):
                 end_loss = loss_fct(end_logits, end_positions)
                 loss = (start_loss + end_loss) / 2
 
-        return {
-            "loss": loss,
-            "logits": logits
-        }
+        return {"loss": loss, "logits": logits}

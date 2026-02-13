@@ -1,9 +1,11 @@
-import torch
-from torch.utils.data import Dataset
 import json
 import logging
 
+import torch
+from torch.utils.data import Dataset
+
 logger = logging.getLogger(__name__)
+
 
 class SentimentDataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):
@@ -32,6 +34,7 @@ class SentimentDataset(Dataset):
             "attention_mask": encoding["attention_mask"].squeeze(),
             "labels": torch.tensor(item["label"], dtype=torch.long),
         }
+
 
 class NERDataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):
@@ -79,6 +82,7 @@ class NERDataset(Dataset):
             "labels": torch.tensor(label_ids, dtype=torch.long),
         }
 
+
 class QADataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):
         self.data = self._load_data(data_path)
@@ -108,8 +112,7 @@ class QADataset(Dataset):
             return_tensors="pt",
         )
 
-        offset_mapping = tokenized_inputs.pop(
-            "offset_mapping").squeeze().tolist()
+        offset_mapping = tokenized_inputs.pop("offset_mapping").squeeze().tolist()
         input_ids = tokenized_inputs["input_ids"].squeeze()
         attention_mask = tokenized_inputs["attention_mask"].squeeze()
 
@@ -129,17 +132,24 @@ class QADataset(Dataset):
                 idx_ptr += 1
             context_end = idx_ptr - 1
 
-            if offset_mapping[context_start][0] > start_char or offset_mapping[context_end][1] < end_char:
+            if (
+                offset_mapping[context_start][0] > start_char
+                or offset_mapping[context_end][1] < end_char
+            ):
                 start_position = 0
                 end_position = 0
             else:
                 idx_ptr = context_start
-                while idx_ptr <= context_end and offset_mapping[idx_ptr][0] <= start_char:
+                while (
+                    idx_ptr <= context_end and offset_mapping[idx_ptr][0] <= start_char
+                ):
                     idx_ptr += 1
                 start_position = idx_ptr - 1
 
                 idx_ptr = context_end
-                while idx_ptr >= context_start and offset_mapping[idx_ptr][1] >= end_char:
+                while (
+                    idx_ptr >= context_start and offset_mapping[idx_ptr][1] >= end_char
+                ):
                     idx_ptr -= 1
                 end_position = idx_ptr + 1
 

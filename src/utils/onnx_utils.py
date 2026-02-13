@@ -1,13 +1,17 @@
-import torch
-import torch.onnx
-import onnx
-import onnxruntime
 import logging
 import os
 
+import onnx
+import onnxruntime
+import torch
+import torch.onnx
+
 logger = logging.getLogger(__name__)
 
-def export_to_onnx(model, dummy_input, onnx_path, input_names, output_names, dynamic_axes):
+
+def export_to_onnx(
+    model, dummy_input, onnx_path, input_names, output_names, dynamic_axes
+):
 
     model.eval()
     logger.info(f"Exporting model to {onnx_path}...")
@@ -26,7 +30,7 @@ def export_to_onnx(model, dummy_input, onnx_path, input_names, output_names, dyn
             do_constant_folding=True,
             input_names=input_names,
             output_names=output_names,
-            dynamic_axes=dynamic_axes
+            dynamic_axes=dynamic_axes,
         )
         logger.info("Model exported successfully.")
 
@@ -38,27 +42,24 @@ def export_to_onnx(model, dummy_input, onnx_path, input_names, output_names, dyn
         logger.error(f"Failed to export model to ONNX: {e}")
         raise
 
+
 def create_onnx_session(onnx_path, providers=None):
 
     if providers is None:
-        providers = ['CPUExecutionProvider']
+        providers = ["CPUExecutionProvider"]
 
-    logger.info(
-        f"Loading ONNX model from {onnx_path} with providers {providers}")
+    logger.info(f"Loading ONNX model from {onnx_path} with providers {providers}")
     session = onnxruntime.InferenceSession(onnx_path, providers=providers)
     return session
 
+
 def quantize_onnx_model(onnx_path, quantized_model_path):
 
-    from onnxruntime.quantization import quantize_dynamic, QuantType
+    from onnxruntime.quantization import QuantType, quantize_dynamic
 
     logger.info(f"Quantizing model {onnx_path} to {quantized_model_path}...")
     try:
-        quantize_dynamic(
-            onnx_path,
-            quantized_model_path,
-            weight_type=QuantType.QUInt8
-        )
+        quantize_dynamic(onnx_path, quantized_model_path, weight_type=QuantType.QUInt8)
         logger.info("Quantization complete.")
     except Exception as e:
         logger.error(f"Failed to quantize model: {e}")

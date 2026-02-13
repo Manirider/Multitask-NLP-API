@@ -1,13 +1,19 @@
-from fastapi import APIRouter, HTTPException
-from .schemas import (
-    SentimentRequest, SentimentResponse,
-    NERRequest, NERResponse, Entity,
-    QARequest, QAResponse,
-)
-import numpy as np
 import logging
+
+import numpy as np
 import onnxruntime
+from fastapi import APIRouter, HTTPException
 from transformers import DistilBertTokenizerFast
+
+from .schemas import (
+    Entity,
+    NERRequest,
+    NERResponse,
+    QARequest,
+    QAResponse,
+    SentimentRequest,
+    SentimentResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -17,20 +23,30 @@ onnx_session: onnxruntime.InferenceSession = None
 tokenizer: DistilBertTokenizerFast = None
 
 id_to_label_ner = {
-    0: "O", 1: "B-PER", 2: "I-PER", 3: "B-ORG", 4: "I-ORG",
-    5: "B-LOC", 6: "I-LOC", 7: "B-MISC", 8: "I-MISC",
+    0: "O",
+    1: "B-PER",
+    2: "I-PER",
+    3: "B-ORG",
+    4: "I-ORG",
+    5: "B-LOC",
+    6: "I-LOC",
+    7: "B-MISC",
+    8: "I-MISC",
 }
+
 
 def _get_model():
     if onnx_session is None:
         raise HTTPException(status_code=503, detail="Model not initialized")
     return onnx_session
 
+
 def _get_tokenizer():
     if tokenizer is None:
         raise HTTPException(
             status_code=503, detail="Tokenizer not initialized")
     return tokenizer
+
 
 def _run_inference(session, input_ids, attention_mask):
 
@@ -39,6 +55,7 @@ def _run_inference(session, input_ids, attention_mask):
         "attention_mask": attention_mask,
     }
     return session.run(None, input_feed)
+
 
 @router.post("/predict/sentiment", response_model=SentimentResponse)
 async def predict_sentiment(request: SentimentRequest):
@@ -59,14 +76,19 @@ async def predict_sentiment(request: SentimentRequest):
 
     return SentimentResponse(text=request.text, sentiment=sentiment, score=score)
 
+
 @router.post("/predict/ner", response_model=NERResponse)
 async def predict_ner(request: NERRequest):
     session = _get_model()
     tok = _get_tokenizer()
 
-    inputs = tok(request.text, return_tensors="np",
-                 truncation=True, padding=True,
-                 return_offsets_mapping=True)
+    inputs = tok(
+        request.text,
+        return_tensors="np",
+        truncation=True,
+        padding=True,
+        return_offsets_mapping=True,
+    )
 
     offset_mapping = inputs.pop("offset_mapping")[0]
     outputs = _run_inference(
@@ -79,7 +101,7 @@ async def predict_ner(request: NERRequest):
     entities = []
     current_entity = None
 
-    for i, (token, label_id) in enumerate(zip(tokens, predictions)):
+    for i, (token, label_id) in enumerate(zip(tokens, predictions, strict=False)):
         if token in ["[CLS]", "[SEP]", "[PAD]"]:
             if current_entity:
                 entities.append(current_entity)
@@ -102,7 +124,9 @@ async def predict_ner(request: NERRequest):
             }
         elif label.startswith("I-") and current_entity:
             if label[2:] == current_entity["type"]:
-                current_entity["text"] = request.text[current_entity["start_char"]:char_end]
+                current_entity["text"] = request.text[
+                    current_entity["start_char"]: char_end
+                ]
                 current_entity["end_char"] = char_end
             else:
                 entities.append(current_entity)
@@ -116,12 +140,18 @@ async def predict_ner(request: NERRequest):
         entities.append(current_entity)
 
     api_entities = [
-        Entity(text=e["text"], type=e["type"],
-               score=e["score"], start_char=e["start_char"], end_char=e["end_char"])
+        Entity(
+            text=e["text"],
+            type=e["type"],
+            score=e["score"],
+            start_char=e["start_char"],
+            end_char=e["end_char"],
+        )
         for e in entities
     ]
 
     return NERResponse(text=request.text, entities=api_entities)
+
 
 @router.post("/predict/qa", response_model=QAResponse)
 async def predict_qa(request: QARequest):
@@ -129,8 +159,11 @@ async def predict_qa(request: QARequest):
     tok = _get_tokenizer()
 
     inputs = tok(
-        request.question, request.context,
-        return_tensors="np", truncation="only_second", padding=True,
+        request.question,
+        request.context,
+        return_tensors="np",
+        truncation="only_second",
+        padding=True,
         return_offsets_mapping=True,
     )
 
@@ -154,7 +187,10 @@ async def predict_qa(request: QARequest):
     start_char = int(offset_mapping[start_index][0])
     end_char = int(offset_mapping[end_index][1])
 
-    return QAResponse(answer=answer, start_char=start_char, end_char=end_char, score=score)
+    return QAResponse(
+        answer=answer, start_char=start_char, end_char=end_char, score=score
+    )
+
 
 @router.get("/health")
 async def health_check():

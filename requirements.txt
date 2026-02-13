@@ -3,7 +3,7 @@ uvicorn
 tqdm
 mlflow
 transformers
-torch
+
 numpy
 seqeval
 prometheus_client
