@@ -3,6 +3,7 @@ uvicorn
 tqdm
 mlflow
 transformers
+torch
 
 numpy
 seqeval
